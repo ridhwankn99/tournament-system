@@ -18,6 +18,7 @@
                          (${tournament.status.name() == 'ONGOING'} ? 'Berlangsung' : 'Selesai')">
         </span>
     </div>
+    <span style="font-size:.75rem; color:#6b7280;">Created by <strong>Ridhwan Khairullah N</strong></span>
     <div th:if="${tournament.status.name() == 'NOT_STARTED'}" class="d-flex gap-2">
         <form th:action="@{/tournaments/{id}/shuffle(id=${tournament.id})}" method="post">
             <button type="submit" class="btn btn-outline-secondary btn-sm">
