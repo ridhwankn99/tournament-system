@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="matchCard(match, tournamentId)"
+     class="bk-card"
+     th:classappend="${match.status.name() == 'READY'}      ? ' bk-ready'   :
+                     (${match.status.name() == 'COMPLETED'} ? ' bk-done'    : ' bk-pending')"
+     th:attr="id='mc-' + ${match.id}">
+
+    <!-- Header -->
+    <div class="bk-card-head">
+        <span class="bk-card-num">MATCH #<span th:text="${match.matchNumber}">1</span></span>
+        <span th:if="${match.status.name() == 'READY'}"      class="bk-badge bk-live">LIVE</span>
+        <span th:if="${match.status.name() == 'COMPLETED'}"  class="bk-badge bk-done-badge">DONE</span>
+    </div>
+
+    <!-- COMPLETED: static result + Edit button -->
+    <th:block th:if="${match.status.name() == 'COMPLETED'}">
+        <div class="bk-row" th:classappend="${match.winner?.id == match.participant1?.id} ? ' bk-win' : ' bk-lose'">
+            <span class="bk-name"
+                  th:classappend="${match.participant1?.isBye} ? ' bk-tbd' : ''"
+                  th:text="${match.participant1 == null} ? 'TBD' : (${match.participant1.isBye} ? '— BYE —' : ${match.participant1.name})">P1</span>
+            <span class="bk-score-val" th:classappend="${match.winner?.id == match.participant1?.id} ? ' bk-score-win' : ''"
+                  th:text="${match.score1 != null} ? ${match.score1} : '–'">0</span>
+            <span class="bk-wl-badge" th:classappend="${match.winner?.id == match.participant1?.id} ? ' bk-wl-win' : ' bk-wl-lose'"
+                  th:text="${match.winner?.id == match.participant1?.id} ? 'WIN' : 'LOSE'">WIN</span>
+        </div>
+        <div class="bk-row" th:classappend="${match.winner?.id == match.participant2?.id} ? ' bk-win' : ' bk-lose'">
+            <span class="bk-name"
+                  th:classappend="${match.participant2?.isBye} ? ' bk-tbd' : ''"
+                  th:text="${match.participant2 == null} ? 'TBD' : (${match.participant2.isBye} ? '— BYE —' : ${match.participant2.name})">P2</span>
+            <span class="bk-score-val" th:classappend="${match.winner?.id == match.participant2?.id} ? ' bk-score-win' : ''"
+                  th:text="${match.score2 != null} ? ${match.score2} : '–'">0</span>
+            <span class="bk-wl-badge" th:classappend="${match.winner?.id == match.participant2?.id} ? ' bk-wl-win' : ' bk-wl-lose'"
+                  th:text="${match.winner?.id == match.participant2?.id} ? 'WIN' : 'LOSE'">LOSE</span>
+        </div>
+        <!-- Edit button — only for non-BYE matches -->
+        <div th:if="${match.participant1 != null and !match.participant1.isBye
+                     and match.participant2 != null and !match.participant2.isBye}"
+             class="bk-edit-row">
+            <form th:action="@{/matches/{id}/edit(id=${match.id})}" method="post">
+                <input type="hidden" name="tournamentId" th:value="${tournamentId}">
+                <button type="submit" class="bk-edit-btn">✎ Edit Hasil</button>
+            </form>
+        </div>
+    </th:block>
+
+    <!-- READY: inline form with score inputs + auto WIN/LOSE -->
+    <th:block th:if="${match.status.name() == 'READY'}">
+        <form th:action="@{/matches/{id}/result(id=${match.id})}" method="post"
+              th:id="'form-' + ${match.id}"
+              th:attr="data-p1id=${match.participant1?.id}, data-p2id=${match.participant2?.id}">
+            <input type="hidden" name="tournamentId" th:value="${tournamentId}">
+            <input type="hidden" name="winnerId" th:id="'win-' + ${match.id}">
+
+            <!-- P1 row -->
+            <div class="bk-row">
+                <span class="bk-name"
+                      th:classappend="${match.participant1 == null or match.participant1.isBye} ? ' bk-tbd' : ''"
+                      th:text="${match.participant1 == null} ? 'TBD' : (${match.participant1.isBye} ? '— BYE —' : ${match.participant1.name})">P1</span>
+                <input type="number" class="bk-sinput"
+                       th:id="'s1-' + ${match.id}" name="score1"
+                       min="0" value="0"
+                       th:attr="data-mid=${match.id}"
+                       oninput="calcWinner(this.dataset.mid)">
+                <span class="bk-wl empty" th:id="'wl1-' + ${match.id}">—</span>
+            </div>
+
+            <!-- P2 row -->
+            <div class="bk-row">
+                <span class="bk-name"
+                      th:classappend="${match.participant2 == null or match.participant2.isBye} ? ' bk-tbd' : ''"
+                      th:text="${match.participant2 == null} ? 'TBD' : (${match.participant2.isBye} ? '— BYE —' : ${match.participant2.name})">P2</span>
+                <input type="number" class="bk-sinput"
+                       th:id="'s2-' + ${match.id}" name="score2"
+                       min="0" value="0"
+                       th:attr="data-mid=${match.id}"
+                       oninput="calcWinner(this.dataset.mid)">
+                <span class="bk-wl empty" th:id="'wl2-' + ${match.id}">—</span>
+            </div>
+
+            <!-- Submit -->
+            <div class="bk-submit-row">
+                <button type="submit" class="bk-submit-btn"
+                        onclick="return beforeSubmit(this.closest('form'))">
+                    ✓ Simpan Hasil
+                </button>
+            </div>
+        </form>
+    </th:block>
+
+    <!-- PENDING: static TBD rows -->
+    <th:block th:if="${match.status.name() == 'PENDING'}">
+        <div class="bk-row">
+            <span class="bk-name bk-tbd"
+                  th:text="${match.participant1 == null} ? 'TBD' : (${match.participant1.isBye} ? '— BYE —' : ${match.participant1.name})">TBD</span>
+            <span class="bk-score-dash">—</span>
+            <span class="bk-wl-empty">—</span>
+        </div>
+        <div class="bk-row">
+            <span class="bk-name bk-tbd"
+                  th:text="${match.participant2 == null} ? 'TBD' : (${match.participant2.isBye} ? '— BYE —' : ${match.participant2.name})">TBD</span>
+            <span class="bk-score-dash">—</span>
+            <span class="bk-wl-empty">—</span>
+        </div>
+    </th:block>
+
+</div>
+
+</body>
+</html>

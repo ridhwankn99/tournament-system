@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="viewCard(match)"
+     class="bk-card"
+     th:classappend="${match.status.name() == 'COMPLETED'} ? ' bk-done' :
+                     (${match.status.name() == 'READY'} ? ' bk-ready' : ' bk-pending')">
+
+    <div class="bk-card-head">
+        <span class="bk-card-num">MATCH #<span th:text="${match.matchNumber}">1</span></span>
+        <span th:if="${match.status.name() == 'READY'}"     class="bk-badge bk-live">LIVE</span>
+        <span th:if="${match.status.name() == 'COMPLETED'}" class="bk-badge bk-done-badge">DONE</span>
+    </div>
+
+    <!-- P1 -->
+    <div class="bk-row"
+         th:classappend="${match.winner?.id == match.participant1?.id} ? ' bk-win' :
+                          (${match.loser?.id == match.participant1?.id} ? ' bk-lose' : '')">
+        <span class="bk-name"
+              th:classappend="${match.participant1 == null or match.participant1.isBye} ? ' bk-tbd' : ''"
+              th:text="${match.participant1 == null} ? 'TBD' :
+                        (${match.participant1.isBye} ? '— BYE —' : ${match.participant1.name})">TBD</span>
+        <span th:if="${match.status.name() == 'COMPLETED'}" class="bk-score-val"
+              th:classappend="${match.winner?.id == match.participant1?.id} ? ' bk-score-win' : ''"
+              th:text="${match.score1 != null} ? ${match.score1} : '–'">0</span>
+        <span th:unless="${match.status.name() == 'COMPLETED'}" class="bk-score-dash">—</span>
+        <span th:if="${match.status.name() == 'COMPLETED'}" class="bk-wl-badge"
+              th:classappend="${match.winner?.id == match.participant1?.id} ? ' bk-wl-win' : ' bk-wl-lose'"
+              th:text="${match.winner?.id == match.participant1?.id} ? 'WIN' : 'LOSE'">WIN</span>
+        <span th:unless="${match.status.name() == 'COMPLETED'}" class="bk-wl-empty">—</span>
+    </div>
+
+    <!-- P2 -->
+    <div class="bk-row"
+         th:classappend="${match.winner?.id == match.participant2?.id} ? ' bk-win' :
+                          (${match.loser?.id == match.participant2?.id} ? ' bk-lose' : '')">
+        <span class="bk-name"
+              th:classappend="${match.participant2 == null or match.participant2.isBye} ? ' bk-tbd' : ''"
+              th:text="${match.participant2 == null} ? 'TBD' :
+                        (${match.participant2.isBye} ? '— BYE —' : ${match.participant2.name})">TBD</span>
+        <span th:if="${match.status.name() == 'COMPLETED'}" class="bk-score-val"
+              th:classappend="${match.winner?.id == match.participant2?.id} ? ' bk-score-win' : ''"
+              th:text="${match.score2 != null} ? ${match.score2} : '–'">0</span>
+        <span th:unless="${match.status.name() == 'COMPLETED'}" class="bk-score-dash">—</span>
+        <span th:if="${match.status.name() == 'COMPLETED'}" class="bk-wl-badge"
+              th:classappend="${match.winner?.id == match.participant2?.id} ? ' bk-wl-win' : ' bk-wl-lose'"
+              th:text="${match.winner?.id == match.participant2?.id} ? 'WIN' : 'LOSE'">LOSE</span>
+        <span th:unless="${match.status.name() == 'COMPLETED'}" class="bk-wl-empty">—</span>
+    </div>
+
+</div>
+</body>
+</html>

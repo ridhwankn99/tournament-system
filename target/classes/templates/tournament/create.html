@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Buat Tournament - Tournament System</title>
+</head>
+<body>
+<section th:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="mb-4">
+                <a th:href="@{/}" class="btn btn-link text-decoration-none ps-0">
+                    <i class="bi bi-arrow-left me-1"></i>Kembali
+                </a>
+                <h2 class="fw-bold mt-1"><i class="bi bi-plus-circle me-2 text-primary"></i>Buat Tournament Baru</h2>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible" role="alert">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <span th:text="${error}">Error</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form th:action="@{/tournaments/create}" method="post">
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold">Nama Tournament</label>
+                            <input type="text" id="name" name="name" class="form-control"
+                                   placeholder="Contoh: Turnamen Catur 2025" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tipe Tournament</label>
+                            <div class="form-control bg-light text-muted">
+                                <i class="bi bi-diagram-3 me-1"></i>Double Elimination
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="participants" class="form-label fw-semibold">
+                                Daftar Peserta
+                                <span class="text-muted fw-normal">(1 nama per baris)</span>
+                            </label>
+                            <textarea id="participants" name="participants" class="form-control"
+                                      rows="8" placeholder="Budi&#10;Andre&#10;Bili&#10;Dodi&#10;..."
+                                      required></textarea>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Sistem mendukung 2, 4, 8, atau 16 peserta. BYE akan ditambah otomatis jika jumlah peserta bukan pangkat 2.
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-1"></i>Buat Tournament
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
